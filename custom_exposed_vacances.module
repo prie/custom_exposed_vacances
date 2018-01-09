@@ -1,0 +1,35 @@
+<?php
+
+function custom_exposed_vacances_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-view-holiday-page') {
+    
+    $available_periodes = _get_available_periodes();
+
+    if (isset($available_periodes)) {
+      // Unset the existing list and add new one with available periodes.
+      unset($form['field_attraction_duration_value']['#options']);
+      $form['field_attraction_duration_value']['#options']['All'] = t('- Any -');
+      foreach ($available_periodes as $available_periode) {
+        $form['field_attraction_duration_value']['#options'][$available_periode->field_attraction_duration_value] = $available_periode->field_attraction_duration_value;
+      }
+    } else {
+      // Unset all options except '- Any -'
+      unset($form['field_attraction_duration_value']['#options']);
+      $form['field_attraction_duration_value']['#options']['All'] = t('- Any -');
+    }
+  }
+} 
+
+function _get_available_periodes() {
+  $query = db_select('field_data_field_attraction_duration', 'prd');
+  $query->join('field_data_field_date_holiday', 'dt', 'dt.entity_id = prd.entity_id');
+  $query->groupBy('prd.field_attraction_duration_value');
+  $periode_result = $query
+  ->fields('prd', array('field_attraction_duration_value'))  // field selected to display
+  ->condition('prd.field_attraction_duration_value', '','<>') // 'where' in drupal api style
+  ->where('dt.field_date_holiday_value2 > NOW()')
+  ->execute()
+  ->fetchAll();
+  return $periode_result;
+} 
+

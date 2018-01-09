@@ -1,0 +1,5 @@
+name = "Custom Exposed Vacances"
+description = "Custom periode exposed filter in view holiday."
+core = 7.x
+
+source : http://wearepropeople.com/blog/limiting-select-options-for-exposed-filter
